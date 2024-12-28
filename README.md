@@ -15,7 +15,7 @@
 2. Установите библиотеки для работы программы
     1. В консоли перейдите в папку с кодом
     2. Выполните `pip install -r requirements.txt`
-3. Установите Cuda ((этот)[https://github.com/chrismeunier/OpenCV-CUDA-installation] гайд в помощь)
+3. Установите Cuda ([этот](https://github.com/chrismeunier/OpenCV-CUDA-installation) гайд в помощь)
 4. Установите Pytesseract
 
 ## Запуск
