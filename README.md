@@ -12,11 +12,12 @@
 
 ## Установка
 1. Установите Python версии ~3.11.9
-2. Установите библиотеки для работы программы
+2. (Скачайте)[https://github.com/Leo-Proger/Auto-buying-stickers-Standoff-2/archive/refs/heads/master.zip] исходный код этого репозитория и распакуйте архив
+3. Установите библиотеки для работы программы
     1. В консоли перейдите в папку с кодом
     2. Выполните `pip install -r requirements.txt`
-3. Установите Cuda ([этот](https://github.com/chrismeunier/OpenCV-CUDA-installation) гайд в помощь)
-4. Установите Pytesseract
+4. Установите Cuda ([этот](https://github.com/chrismeunier/OpenCV-CUDA-installation) гайд в помощь)
+5. Установите Pytesseract
 
 ## Запуск
 1. В настройках эмулятора выставите: ширина - 1280, высота - 960, dpi - 240
