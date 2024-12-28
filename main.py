@@ -1,4 +1,6 @@
 import asyncio
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import cv2
@@ -31,26 +33,17 @@ from PIL import ImageGrab
 #
 # 	return relative_x1, relative_y1, relative_x2, relative_y2
 
+count = 0
+BUY_X, BUY_Y = 1073, 666
+# to_continue = True
+count_stickers = None
+price = None
+stop_event = asyncio.Event()
+
+gpu_canny = cv2.cuda.createCannyEdgeDetector(400, 300)
+
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Путь до tesseract.exe
 tesseract_config = r'--oem 3 --psm 6'
-
-
-async def buy_lot(buy_lot_y):
-	global to_continue
-
-	win32api.SetCursorPos((1370, buy_lot_y))
-	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
-	win32api.SetCursorPos((BUY_X, BUY_Y))
-
-	await asyncio.sleep(0.05)
-	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
-
-	to_continue = False
-	print("Purchased!")
-
-
-# pyautogui.doubleClick(761, 306, interval=0.1)
-
 
 async def test_stickers(count_stickers):
 	bbox = {
@@ -66,6 +59,21 @@ async def test_stickers(count_stickers):
 		# edges = await asyncio.to_thread(cv2.Canny, screen, 400, 300)
 		cv2.imshow('screen', screen)
 		cv2.waitKey(1)
+
+async def periodic_double_click(interval=15):
+	while True:
+		await asyncio.sleep(interval)
+		pyautogui.doubleClick(761, 306, interval=0.1)
+
+
+async def buy_lot(buy_lot_y):
+	win32api.SetCursorPos((1370, buy_lot_y))
+	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+	win32api.SetCursorPos((BUY_X, BUY_Y))
+	await asyncio.sleep(0.04)
+	win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+	stop_event.set()
+	print("Purchased!")
 
 
 def process_image(image):
@@ -90,34 +98,25 @@ async def check_lot_price(screen, price_y1, buy_price_lot_y):
 
 
 async def check_lot_edges(screen, sticker_y1, buy_sticker_lot_y, price_y1=None, price_y2=None):
-	global to_continue, count
+	global count
 
 	borders = screen[sticker_y1:sticker_y1 + 31, 0:-1]
 
-	# Создание GpuMat и загрузка изображения в память GPU
 	gpu_borders = cv2.cuda_GpuMat()
 	gpu_borders.upload(borders)
-
-	# Создание GpuMat для хранения результата
-	gpu_edges = cv2.cuda_GpuMat(gpu_borders.size(), cv2.CV_8UC1)
-
-	# Применение Canny на GPU
-	cv2.cuda.createCannyEdgeDetector(400, 300).detect(gpu_borders, gpu_edges)
-
-	# Загрузка результата обратно в память CPU
+	gpu_borders_gray = cv2.cuda.cvtColor(gpu_borders, cv2.COLOR_BGR2GRAY)
+	gpu_edges = gpu_canny.detect(gpu_borders_gray)
 	edges = gpu_edges.download()
 
-	if cv2.countNonZero(edges) > 5:
+	if cv2.countNonZero(edges):
 		await buy_lot(buy_sticker_lot_y)
 
-	else:
-		if count == 10000:
-			pyautogui.doubleClick(761, 306, interval=0.1)
-			count = 0
 
-			await asyncio.sleep(0.05)
-		else:
-			count += 1
+async def process_stickers(bbox):
+	while not stop_event.is_set():
+		screen_stickers = numpy.array(ImageGrab.grab(bbox=bbox))
+		tasks = (check_lot_edges(screen_stickers, y1, y1 + 365) for y1 in range(0, screen_stickers.shape[0], 31))
+		await asyncio.gather(*tasks)
 
 
 async def main():
@@ -134,20 +133,9 @@ async def main():
 			3: (1095, 346, 1125, 941),
 			4: (1065, 346, 1095, 941),
 			}[count_stickers]
-
-		while to_continue:
-			screen_stickers = numpy.array(await asyncio.to_thread(ImageGrab.grab, bbox=bbox))
-			tasks = (check_lot_edges(screen_stickers, *coords) for coords in (
-				(0, 386),
-				(83, 467),
-				(166, 548),
-				(246, 630),
-				(329, 664),
-				(456, 745),
-				(492, 827),
-				(578, 908),
-				))
-			await asyncio.gather(*tasks)
+		periodic_task = asyncio.create_task(periodic_double_click())
+		await process_stickers(bbox)
+	# await periodic_task
 	elif price:
 		while to_continue:
 			screen_price = numpy.array(await asyncio.to_thread(ImageGrab.grab, bbox=bbox_price))
@@ -164,13 +152,8 @@ async def main():
 			await asyncio.gather(*tasks)
 
 
-count = 0
-BUY_X, BUY_Y = 1073, 666
-to_continue = True
-count_stickers = None
-price = None
-
 params = input("Введите количество наклеек и/или цену, меньше которой надо купить лот >>> ").split()
+# params = '4'
 
 if len(params) == 1:
 	if (par := params[0]).isdigit():
@@ -182,5 +165,6 @@ else:
 	price = float(params[1])
 
 asyncio.run(main())
+
 # Закомментируйте строчку выше и раскомментируйте строчку ниже, чтобы проверить, правильно ли находятся наклейки
 # asyncio.run(test_stickers(1))
