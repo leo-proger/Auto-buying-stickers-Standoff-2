@@ -167,7 +167,7 @@ class StickerBot:
 
 
 async def main():
-    mode = input("1. Купить по количеству наклеек\n2. Купить ниже определенной цены")
+    mode = input("1. Купить по количеству наклеек\n2. Купить ниже определенной цены\n>>> ")
 
     sticker_count = None
     max_price = None
@@ -190,5 +190,5 @@ async def main():
 
 if __name__ == "__main__":
     # Закомментируйте строчку выше и раскомментируйте строчку ниже, чтобы проверить, правильно ли находятся наклейки
-    asyncio.run(StickerBot.test_sticker_detection(1))
-    # asyncio.run(main())
+    # asyncio.run(StickerBot.test_sticker_detection(1))
+    asyncio.run(main())
