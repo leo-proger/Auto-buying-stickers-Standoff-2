@@ -22,10 +22,10 @@ class Config:
 
     BUY_BUTTON_COORDINATES: Tuple[int, int] = (1073, 666)
     STICKER_BBOX = {
-        1: (1155, 346, 1185, 941),
-        2: (1125, 346, 1155, 941),
-        3: (1095, 346, 1125, 941),
-        4: (1065, 346, 1095, 941),
+        1: (1188, 335, 1225, 930),
+        2: (1151, 335, 1188, 930),
+        3: (1119, 335, 1156, 930),
+        4: (1084, 335, 1121, 930),
     }
 
     UPDATE_LOTS_BUTTON_COORDINATES: Tuple[int, int] = (761, 306)
@@ -152,7 +152,7 @@ class StickerBot:
     async def test_sticker_detection(sticker_count):
         while True:
             screen = np.array(await asyncio.to_thread(ImageGrab.grab, bbox=Config.STICKER_BBOX[sticker_count]))
-            # edges = await asyncio.to_thread(cv2.Canny, screen, 400, 300)
+            # screen = await asyncio.to_thread(cv2.Canny, screen, 400, 300)
             cv2.imshow('screen', screen)
             cv2.waitKey(1)
 
