@@ -1,6 +1,5 @@
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from typing import Tuple, Optional
 
 import cv2
@@ -132,14 +131,6 @@ class StickerBot:
             ]
             await asyncio.gather(*tasks)
 
-    @staticmethod
-    async def test_sticker_detection(sticker_count):
-        while True:
-            screen = np.array(await asyncio.to_thread(ImageGrab.grab, bbox=Config.STICKER_BBOX[sticker_count]))
-            # screen = await asyncio.to_thread(cv2.Canny, screen, 400, 300)
-            cv2.imshow('screen', screen)
-            cv2.waitKey(1)
-
     async def run(self) -> None:
         """Основной метод запускающий вызывающий все остальные методы в классе"""
         if self.sticker_count:
@@ -173,6 +164,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Закомментируйте строчку выше и раскомментируйте строчку ниже, чтобы проверить, правильно ли находятся наклейки
-    # asyncio.run(StickerBot.test_sticker_detection(1))
     asyncio.run(main())
