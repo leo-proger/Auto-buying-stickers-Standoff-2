@@ -19,7 +19,11 @@ class ImageProcessor:
     """Управляет обработкой изображения"""
 
     def __init__(self):
+        # Можно отрегулировать числа, если случайно покупается лот
         self.gpu_canny = cv2.cuda.createCannyEdgeDetector(400, 300)
+        self.gpu_borders = cv2.cuda.GpuMat()
+        self.gpu_borders_gray = cv2.cuda.GpuMat()
+
         pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_PATH
 
     async def process_price(self, image: np.ndarray) -> Optional[float]:
@@ -37,7 +41,7 @@ class ImageProcessor:
 
     def process_edges(self, image: np.ndarray) -> np.ndarray:
         """Process image edges using GPU acceleration."""
-        gpu_image = cv2.cuda_GpuMat()
+        gpu_image = cv2.cuda.GpuMat()
         gpu_image.upload(image)
         gpu_image_gray = cv2.cuda.cvtColor(gpu_image, cv2.COLOR_BGR2GRAY)
         gpu_edges = self.gpu_canny.detect(gpu_image_gray)
@@ -84,25 +88,30 @@ class StickerBot:
         self.mouse_controller = MouseController()
         self.screen_capture = ScreenCapture()
 
-    async def check_lot_price(self, screen: np.ndarray, price_y1: int, buy_price_lot_y: int) -> None:
+    async def buy_lot(self, buy_sticker_lot_y: int) -> None:
+        await self.mouse_controller.buy_lot(buy_sticker_lot_y)
+        self.stop_event.set()
+        print("Purchased!")
+        input()
+
+    async def check_lot_price(self, screen: np.ndarray, price_y_pos: int, buy_button_y_pos: int) -> None:
         """Проверяет цену лота и покупает, если она меньше max_price"""
-        border = screen[price_y1:price_y1 + 23, 0:-1]
+        border = screen[price_y_pos:price_y_pos + 23, 0:-1]
         price_lot = await self.image_processor.process_price(border)
 
         if price_lot is not None and price_lot <= self.max_price:
-            await self.mouse_controller.buy_lot(buy_price_lot_y)
+            await self.mouse_controller.buy_lot(buy_button_y_pos)
             self.stop_event.set()
             print("Purchased!")
 
-    async def check_lot_edges(self, screen: np.ndarray, sticker_y1: int, buy_sticker_lot_y: int) -> None:
+
+    async def check_lot_edges(self, screen: np.ndarray, sticker_y_pos: int, buy_button_y_pos: int) -> None:
         """Если в области screen имеется определенное количество точек, то, вероятно, это наклейка"""
-        borders = screen[sticker_y1:sticker_y1 + 31, 0:-1]
+        borders = screen[sticker_y_pos:sticker_y_pos + 31, 0:-1]
         edges = self.image_processor.process_edges(borders)
 
         if cv2.countNonZero(edges):
-            await self.mouse_controller.buy_lot(buy_sticker_lot_y)
-            self.stop_event.set()
-            print("Purchased!")
+            await self.buy_lot(buy_button_y_pos)
 
     async def process_stickers(self) -> None:
         """Обрабатывает стикеры"""
