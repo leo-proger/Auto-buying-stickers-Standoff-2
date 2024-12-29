@@ -9,7 +9,6 @@ import pyautogui
 import pytesseract
 import win32api
 import win32con
-from PIL import ImageGrab
 
 import Config
 
@@ -96,16 +95,20 @@ class StickerBot:
     def __init__(self, sticker_count: Optional[int] = None, max_price: Optional[float] = None):
         self.sticker_count = sticker_count
         self.max_price = max_price
+
         self.stop_event = asyncio.Event()
+        self.buy_lock = asyncio.Lock()
+
         self.image_processor = ImageProcessor()
         self.mouse_controller = MouseController()
         self.screen_capture = ScreenCapture()
 
     async def buy_lot(self, buy_sticker_lot_y: int) -> None:
-        await self.mouse_controller.buy_lot(buy_sticker_lot_y)
-        self.stop_event.set()
-        print("Purchased!")
-        input()
+        async with self.buy_lock:
+            if not self.stop_event.is_set():
+                await self.mouse_controller.buy_lot(buy_sticker_lot_y)
+                self.stop_event.set()
+                print("Purchased!")
 
     async def check_lot_price(self, screen: np.ndarray, price_y_pos: int, buy_button_y_pos: int) -> None:
         """Проверяет цену лота и покупает, если она меньше max_price"""
@@ -113,10 +116,7 @@ class StickerBot:
         price_lot = await self.image_processor.process_price(border)
 
         if price_lot is not None and price_lot <= self.max_price:
-            await self.mouse_controller.buy_lot(buy_button_y_pos)
-            self.stop_event.set()
-            print("Purchased!")
-
+            await self.buy_lot(buy_button_y_pos)
 
     async def check_lot_edges(self, screen: np.ndarray, sticker_y_pos: int, buy_button_y_pos: int) -> None:
         """Если в области screen имеется определенное количество точек, то, вероятно, это наклейка"""
@@ -129,6 +129,7 @@ class StickerBot:
     async def process_stickers(self) -> None:
         """Обрабатывает стикеры"""
         bbox = Config.STICKER_BBOX[self.sticker_count]
+
         while not self.stop_event.is_set():
             screen = await self.screen_capture.capture_screen(bbox)
             tasks = [
