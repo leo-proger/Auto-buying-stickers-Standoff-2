@@ -3,3 +3,4 @@ PyAutoGUI>=0.9.54
 pytesseract>=0.3.13
 pywin32>=306
 pillow>=10.4.0
+mss>=10.0.0

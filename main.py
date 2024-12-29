@@ -3,6 +3,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Tuple, Optional
 
 import cv2
+import mss
 import numpy as np
 import pyautogui
 import pytesseract
@@ -40,12 +41,16 @@ class ImageProcessor:
             return None
 
     def process_edges(self, image: np.ndarray) -> np.ndarray:
-        """Process image edges using GPU acceleration."""
-        gpu_image = cv2.cuda.GpuMat()
-        gpu_image.upload(image)
-        gpu_image_gray = cv2.cuda.cvtColor(gpu_image, cv2.COLOR_BGR2GRAY)
-        gpu_edges = self.gpu_canny.detect(gpu_image_gray)
-        return gpu_edges.download()
+        """Обрабатывает контуры изображения, используя GPU"""
+        try:
+            gpu_image = cv2.cuda.GpuMat()
+            gpu_image.upload(image)
+            gpu_image_gray = cv2.cuda.cvtColor(gpu_image, cv2.COLOR_BGRA2GRAY)
+            gpu_edges = self.gpu_canny.detect(gpu_image_gray)
+            return gpu_edges.download()
+        finally:
+            gpu_image.release()
+            gpu_image_gray.release()
 
 
 class MouseController:
@@ -54,7 +59,7 @@ class MouseController:
     @staticmethod
     async def buy_lot(buy_lot_y: int) -> None:
         """Покупает лот"""
-        win32api.SetCursorPos((1370, buy_lot_y))
+        win32api.SetCursorPos((1390, buy_lot_y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
         win32api.SetCursorPos(Config.BUY_BUTTON_COORDINATES)
         await asyncio.sleep(0.04)
@@ -71,10 +76,18 @@ class MouseController:
 class ScreenCapture:
     """Управляет захватом изображения"""
 
-    @staticmethod
-    async def capture_screen(bbox: Tuple[int, int, int, int]) -> np.ndarray:
+    def __init__(self):
+        self.sct = mss.mss()
+
+    async def capture_screen(self, bbox: Tuple[int, int, int, int]) -> np.ndarray:
         """Захватывает часть экрана по координатам в bbox"""
-        return np.array(await asyncio.to_thread(ImageGrab.grab, bbox=bbox))
+        monitor = {
+            "left": bbox[0],
+            "top": bbox[1],
+            "width": bbox[2] - bbox[0],
+            "height": bbox[3] - bbox[1]
+        }
+        return np.array(self.sct.grab(monitor))
 
 
 class StickerBot:
