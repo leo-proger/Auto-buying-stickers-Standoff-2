@@ -123,7 +123,7 @@ class StickerBot:
         borders = screen[sticker_y_pos:sticker_y_pos + 31, 0:-1]
         edges = self.image_processor.process_edges(borders)
 
-        if cv2.countNonZero(edges):
+        if np.count_nonzero(edges) > Config.BUY_STICKER_THRESHOLD:
             await self.buy_lot(buy_button_y_pos)
 
     async def process_stickers(self) -> None:
