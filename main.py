@@ -105,10 +105,9 @@ class StickerBot:
 
     async def buy_lot(self, buy_sticker_lot_y: int) -> None:
         async with self.buy_lock:
-            if not self.stop_event.is_set():
-                await self.mouse_controller.buy_lot(buy_sticker_lot_y)
-                self.stop_event.set()
-                print("Purchased!")
+            await self.mouse_controller.buy_lot(buy_sticker_lot_y)
+            self.stop_event.set()
+            print("Purchased!")
 
     async def check_lot_price(self, screen: np.ndarray, price_y_pos: int, buy_button_y_pos: int) -> None:
         """Проверяет цену лота и покупает, если она меньше max_price"""
