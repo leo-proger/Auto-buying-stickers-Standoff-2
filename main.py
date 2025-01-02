@@ -58,7 +58,7 @@ class MouseController:
     @staticmethod
     async def buy_lot(buy_lot_y: int) -> None:
         """Покупает лот"""
-        win32api.SetCursorPos((1390, buy_lot_y))
+        win32api.SetCursorPos((1445, buy_lot_y))
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
         win32api.SetCursorPos(Config.BUY_BUTTON_COORDINATES)
         await asyncio.sleep(0.04)
@@ -119,7 +119,7 @@ class StickerBot:
 
     async def check_lot_edges(self, screen: np.ndarray, sticker_y_pos: int, buy_button_y_pos: int) -> None:
         """Если в области screen имеется определенное количество точек, то, вероятно, это наклейка"""
-        borders = screen[sticker_y_pos:sticker_y_pos + 31, 0:-1]
+        borders = screen[sticker_y_pos + 20:sticker_y_pos + 55, 0:-1]
         edges = self.image_processor.process_edges(borders)
 
         if np.count_nonzero(edges) > Config.BUY_STICKER_THRESHOLD:
@@ -132,8 +132,8 @@ class StickerBot:
         while not self.stop_event.is_set():
             screen = await self.screen_capture.capture_screen(bbox)
             tasks = [
-                self.check_lot_edges(screen, y1, y1 + 365)
-                for y1 in range(0, screen.shape[0], 31)
+                self.check_lot_edges(screen, y1, y1 + 340)
+                for y1 in range(0, screen.shape[0], 78)
             ]
             await asyncio.gather(*tasks)
 
