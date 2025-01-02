@@ -16,7 +16,7 @@ class ImageProcessor:
 
     def __init__(self):
         # Можно отрегулировать числа, если случайно покупается лот
-        self.gpu_canny = cv2.cuda.createCannyEdgeDetector(400, 300)
+        self.gpu_canny = cv2.cuda.createCannyEdgeDetector(500, 200)
         self.gpu_borders = cv2.cuda.GpuMat()
         self.gpu_borders_gray = cv2.cuda.GpuMat()
 
@@ -91,7 +91,7 @@ class StickerBot:
         async with self.buy_lock:
             await self.mouse_controller.buy_lot(buy_sticker_lot_y)
             self.stop_event.set()
-            print("Purchased!")
+            print("Куплено!")
 
     async def check_lot_edges(self, screen: np.ndarray, sticker_y_pos: int, buy_button_y_pos: int) -> None:
         """Если в области screen имеется определенное количество точек, то, вероятно, это наклейка"""
@@ -116,6 +116,7 @@ class StickerBot:
     async def run(self) -> None:
         """Основной метод запускающий вызывающий все остальные методы в классе"""
         if self.sticker_count:
+            print("Работаем...")
             periodic_task = asyncio.create_task(self.mouse_controller.periodic_double_click())
             await self.process_stickers()
             periodic_task.cancel()
