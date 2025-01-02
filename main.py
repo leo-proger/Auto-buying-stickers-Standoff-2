@@ -36,21 +36,25 @@ class ImageProcessor:
 class MouseController:
     """Управляет всеми операциями, связанными с мышью"""
 
-    @staticmethod
-    async def buy_lot(buy_lot_y: int) -> None:
-        """Покупает лот"""
-        win32api.SetCursorPos((1445, buy_lot_y))
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
-        win32api.SetCursorPos(Config.BUY_BUTTON_COORDINATES)
-        await asyncio.sleep(0.04)
-        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+    def __init__(self):
+        self.mouse_lock = asyncio.Lock()
 
-    @staticmethod
-    async def periodic_double_click() -> None:
+    async def buy_lot(self, buy_lot_y: int) -> None:
+        """Покупает лот"""
+        async with self.mouse_lock:
+            win32api.SetCursorPos((1445, buy_lot_y))
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+            win32api.SetCursorPos(Config.BUY_BUTTON_COORDINATES)
+            await asyncio.sleep(0.04)
+            win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN | win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+
+    async def periodic_double_click(self) -> None:
         """Периодически обновляет список лотов"""
         while True:
             await asyncio.sleep(Config.UPDATE_LOTS_BUTTON_INTERVAL)
-            pyautogui.doubleClick(*Config.UPDATE_LOTS_BUTTON_COORDINATES, interval=0.1)
+
+            async with self.mouse_lock:
+                pyautogui.doubleClick(*Config.UPDATE_LOTS_BUTTON_COORDINATES, interval=0.03)
 
 
 class ScreenCapture:

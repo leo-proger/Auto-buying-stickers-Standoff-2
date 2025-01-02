@@ -10,8 +10,9 @@ import Config
 async def test_sticker_detection(sticker_count: int) -> None:
     while True:
         screen = np.array(await asyncio.to_thread(ImageGrab.grab, bbox=Config.STICKER_BBOX[sticker_count]))
-        # screen = await asyncio.to_thread(cv2.Canny, screen, 400, 300)
-        # print(np.count_nonzero(screen[20:55, 0:-1]))
+        screen = await asyncio.to_thread(cv2.Canny, screen, 500, 200)
+        # screen = (await asyncio.to_thread(cv2.Canny, screen, 500, 200))[20:55, 0:-1]
+        # print(np.count_nonzero(screen))
         cv2.imshow('screen', screen)
         cv2.waitKey(1)
 
