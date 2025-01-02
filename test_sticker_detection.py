@@ -16,4 +16,5 @@ async def test_sticker_detection(sticker_count: int) -> None:
 
 
 if __name__ == '__main__':
-    asyncio.run(test_sticker_detection(1)) # Цифра означает количество наклеек
+    sticker_count = int(input("Введите количество наклеек >>> "))
+    asyncio.run(test_sticker_detection(sticker_count))  # Цифра означает количество наклеек
