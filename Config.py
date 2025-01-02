@@ -12,10 +12,6 @@ def load_config() -> dict:
 
 config = load_config()
 
-# Путь к Tesseract
-TESSERACT_PATH: str = config['TESSERACT_PATH']
-TESSERACT_CONFIG: str = config['TESSERACT_CONFIG']
-
 # Координаты кнопки покупки
 BUY_BUTTON_COORDINATES: Tuple[int, int] = tuple(config['BUY_BUTTON_COORDINATES'])
 

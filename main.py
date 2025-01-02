@@ -1,12 +1,10 @@
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
 from typing import Tuple, Optional
 
 import cv2
 import mss
 import numpy as np
 import pyautogui
-import pytesseract
 import win32api
 import win32con
 
@@ -21,21 +19,6 @@ class ImageProcessor:
         self.gpu_canny = cv2.cuda.createCannyEdgeDetector(400, 300)
         self.gpu_borders = cv2.cuda.GpuMat()
         self.gpu_borders_gray = cv2.cuda.GpuMat()
-
-        pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_PATH
-
-    async def process_price(self, image: np.ndarray) -> Optional[float]:
-        """Извлекает текст из изображения и преобразует в число (цену)"""
-        try:
-            with ThreadPoolExecutor() as executor:
-                loop = asyncio.get_event_loop()
-                text = await loop.run_in_executor(
-                    executor,
-                    lambda: pytesseract.image_to_string(image, config=Config.TESSERACT_CONFIG)
-                )
-            return float(text.replace(' ', ''))
-        except ValueError:
-            return None
 
     def process_edges(self, image: np.ndarray) -> np.ndarray:
         """Обрабатывает контуры изображения, используя GPU"""
@@ -90,9 +73,8 @@ class ScreenCapture:
 class StickerBot:
     """Основной класс, запускающий все процессы"""
 
-    def __init__(self, sticker_count: Optional[int] = None, max_price: Optional[float] = None):
+    def __init__(self, sticker_count: Optional[int] = None):
         self.sticker_count = sticker_count
-        self.max_price = max_price
 
         self.stop_event = asyncio.Event()
         self.buy_lock = asyncio.Lock()
@@ -106,14 +88,6 @@ class StickerBot:
             await self.mouse_controller.buy_lot(buy_sticker_lot_y)
             self.stop_event.set()
             print("Purchased!")
-
-    async def check_lot_price(self, screen: np.ndarray, price_y_pos: int, buy_button_y_pos: int) -> None:
-        """Проверяет цену лота и покупает, если она меньше max_price"""
-        border = screen[price_y_pos:price_y_pos + 23, 0:-1]
-        price_lot = await self.image_processor.process_price(border)
-
-        if price_lot is not None and price_lot <= self.max_price:
-            await self.buy_lot(buy_button_y_pos)
 
     async def check_lot_edges(self, screen: np.ndarray, sticker_y_pos: int, buy_button_y_pos: int) -> None:
         """Если в области screen имеется определенное количество точек, то, вероятно, это наклейка"""
@@ -135,51 +109,22 @@ class StickerBot:
             ]
             await asyncio.gather(*tasks)
 
-    async def process_prices(self) -> None:
-        """Обрабатывает цены"""
-        bbox_price = (1228, 351, 1274, 942)
-        price_coords = [
-            (0, 386), (81, 467), (162, 548), (243, 630),
-            (324, 664), (405, 745), (486, 827), (567, 908)
-        ]
-
-        while not self.stop_event.is_set():
-            screen = await self.screen_capture.capture_screen(bbox_price)
-            tasks = [
-                self.check_lot_price(screen, *coords)
-                for coords in price_coords
-            ]
-            await asyncio.gather(*tasks)
-
     async def run(self) -> None:
         """Основной метод запускающий вызывающий все остальные методы в классе"""
         if self.sticker_count:
             periodic_task = asyncio.create_task(self.mouse_controller.periodic_double_click())
             await self.process_stickers()
             periodic_task.cancel()
-        elif self.max_price:
-            await self.process_prices()
 
 
 async def main():
-    mode = input("1. Купить по количеству наклеек\n2. Купить ниже определенной цены\n>>> ")
-
     sticker_count = None
-    max_price = None
-
     try:
-        if mode == "1":
-            sticker_count_input = input("Введите количество наклеек >>> ")
-            sticker_count = int(sticker_count_input)
-        elif mode == "2":
-            max_price_input = input("Введите цену, ниже которой надо купить лот >>> ")
-            max_price = float(max_price_input)
-        # TODO: Совместить 2 режима выше (покупать и с определенный количеством наклеек, и меньше какой-то цены)
+        sticker_count = int(input("Введите количество наклеек >>> "))
     except ValueError:
-        print("Введены некорректные данные. Попробуйте снова...")
-        input()
+        print("Некорректно введены данные")
 
-    bot = StickerBot(sticker_count, max_price)
+    bot = StickerBot(sticker_count)
     await bot.run()
 
 

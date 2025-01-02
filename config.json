@@ -1,6 +1,4 @@
 {
-    "TESSERACT_PATH": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
-    "TESSERACT_CONFIG": "--oem 3 --psm 6",
     "BUY_BUTTON_COORDINATES": [
         955,
         657
