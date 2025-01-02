@@ -1,17 +1,36 @@
-from typing import Tuple
+import json
+from typing import Tuple, Dict
 
-TESSERACT_PATH: str = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-TESSERACT_CONFIG: str = r'--oem 3 --psm 6'
 
-BUY_BUTTON_COORDINATES: Tuple[int, int] = (1073, 666)
-BUY_STICKER_THRESHOLD: int = 72  # Если случайно покупает лоты, то повысьте значение. Если наоборот, не покупает, то уменьшите
-STICKER_BBOX = {
-    1: (1188, 335, 1225, 930),
-    2: (1152, 335, 1189, 930),
-    3: (1119, 335, 1155, 930),
-    4: (1084, 335, 1121, 930),
+def load_config() -> dict:
+    try:
+        with open('config.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError("config.json не найден")
+
+
+config = load_config()
+
+# Путь к Tesseract
+TESSERACT_PATH: str = config['TESSERACT_PATH']
+TESSERACT_CONFIG: str = config['TESSERACT_CONFIG']
+
+# Координаты кнопки покупки
+BUY_BUTTON_COORDINATES: Tuple[int, int] = tuple(config['BUY_BUTTON_COORDINATES'])
+
+# Порог для определения наклейки
+# Если случайно покупает лоты, то повысьте значение. Если наоборот, не покупает, то уменьшите
+BUY_STICKER_THRESHOLD: int = config['BUY_STICKER_THRESHOLD']
+
+# Области для поиска наклеек
+STICKER_BBOX: Dict[int, Tuple[int, int, int, int]] = {
+    int(k): tuple(v) for k, v in config['STICKER_BBOX'].items()
 }
 
-UPDATE_LOTS_BUTTON_COORDINATES: Tuple[int, int] = (780, 290)
-UPDATE_LOTS_BUTTON_INTERVAL: float = 5.0
-UPDATE_LOTS_BUTTON_DELAY: float = 0.001  # Выставить в соответствии с вашим интернетом. Чем он хуже, тем больше значение
+# Координаты и настройки кнопки обновления лотов
+UPDATE_LOTS_BUTTON_COORDINATES: Tuple[int, int] = tuple(config['UPDATE_LOTS_BUTTON_COORDINATES'])
+UPDATE_LOTS_BUTTON_INTERVAL: float = config['UPDATE_LOTS_BUTTON_INTERVAL']
+
+# Задержка обновления (выставить в соответствии с вашим интернетом. Чем он хуже, тем больше значение)
+UPDATE_LOTS_BUTTON_DELAY: float = config['UPDATE_LOTS_BUTTON_DELAY']

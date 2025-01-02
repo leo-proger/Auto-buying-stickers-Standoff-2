@@ -1,0 +1,15 @@
+{
+    "TESSERACT_PATH": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe",
+    "TESSERACT_CONFIG": "--oem 3 --psm 6",
+    "BUY_BUTTON_COORDINATES": [1073, 666],
+    "BUY_STICKER_THRESHOLD": 72,
+    "STICKER_BBOX": {
+        "1": [1188, 313, 1223, 931],
+        "2": [1154, 337, 1188, 926],
+        "3": [1119, 335, 1155, 930],
+        "4": [1084, 335, 1121, 930]
+    },
+    "UPDATE_LOTS_BUTTON_COORDINATES": [780, 288],
+    "UPDATE_LOTS_BUTTON_INTERVAL": 5.0,
+    "UPDATE_LOTS_BUTTON_DELAY": 0.001
+}
