@@ -34,15 +34,9 @@ def get_button_click() -> Tuple[int, int]:
     window_rect = get_window_rect(hwnd)
 
     print("\nВам нужно кликнуть на кнопку обновления лотов")
-    print("Нажмите Esc для отмены")
-
     input("\nВведите что-нибудь, когда будете готовы >>> ")
 
     while True:
-        if keyboard.is_pressed('esc'):
-            print("\nОперация отменена")
-            sys.exit()
-
         if win32api.GetAsyncKeyState(win32con.VK_LBUTTON) < 0:
             x, y = win32api.GetCursorPos()
 
@@ -69,7 +63,7 @@ def update_config(coords: Tuple[int, int]) -> None:
     with open('config.json', 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
 
-    print(f"\nКоординаты кнопки {coords} обновления успешно обновлены в config.json")
+    print(f"\nКоординаты {coords} кнопки обновления успешно обновлены в config.json")
 
 
 def main():

@@ -36,15 +36,10 @@ def get_mouse_clicks() -> Tuple[Tuple[int, int], Tuple[int, int]]:
 
     print("1. Вам нужно кликнуть в левый верхний угол области")
     print("2. Потом в правый нижний угол области")
-    print("Нажмите Esc для отмены")
 
     input("\nВведите что-нибудь, когда будете готовы >>> ")
 
     while len(clicks) < 2:
-        if keyboard.is_pressed('esc'):
-            print("\nОперация отменена")
-            sys.exit()
-
         if win32api.GetAsyncKeyState(win32con.VK_LBUTTON) < 0:
             x, y = win32api.GetCursorPos()
 
@@ -103,10 +98,7 @@ def main():
 
             coords = get_mouse_clicks()
             update_config(sticker_count, coords)
-
-            answer = input("\nХотите настроить координаты для другого количества наклеек? (y/n): ")
-            if answer.lower() != 'y':
-                break
+            break
     except KeyboardInterrupt:
         print("\nПрограмма завершена")
     except Exception as e:
