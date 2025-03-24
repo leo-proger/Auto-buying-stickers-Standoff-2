@@ -55,7 +55,3 @@ https://github.com/user-attachments/assets/9b67b882-5149-426a-8515-064c9b2af197
   загрузки может принять за стикер)
 - Не работает со скинами с паттернами
 - Темные наклейки может не заметить
-
-## Контакты
-
-- Telegram - [Leo Proger](https://t.me/Leo_Proger)
