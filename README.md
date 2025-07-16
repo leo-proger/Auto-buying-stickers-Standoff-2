@@ -27,10 +27,10 @@ https://github.com/user-attachments/assets/9b67b882-5149-426a-8515-064c9b2af197
 ## Требования
 
 - Операционная система Windows 10/11 (другие не тестировались)
-- Видеокарта Nvidia модели около GTX 1650
+- Видеокарта Nvidia GTX 1050 и лучше
 - ~15гб свободного дискового пространства на диске C
 - Эмулятор LdPlayer 9 (другие не тестировались)
-- Много времени и терпения
+- Время и терпение
 
 ## Установка
 
@@ -40,10 +40,7 @@ https://github.com/user-attachments/assets/9b67b882-5149-426a-8515-064c9b2af197
 3. Установите библиотеки для работы программы
     1. В консоли перейдите в папку с кодом: `cd "путь к папке с кодом"`
     2. Выполните: `pip install -r requirements.txt`
-4. Установите Cuda ([этот](https://github.com/chrismeunier/OpenCV-CUDA-installation) гайд в помощь)
-    1. В интернете проблематично найти Visual Studio именно 2019
-       года. [Вот](https://github.com/user-attachments/files/18280278/vs_Community.zip) ссылка на нее, чтобы вы не
-       тратили время на поиски
+4. Установите CUDA (по [этому](https://github.com/leo-proger/OpenCV-CUDA-installation-in-Russian) гайду)
 
 ## Настройка
 
@@ -68,7 +65,3 @@ https://github.com/user-attachments/assets/9b67b882-5149-426a-8515-064c9b2af197
   загрузки может принять за стикер)
 - Не работает со скинами с паттернами
 - Темные наклейки может не заметить
-
-## Контакты
-
-- Telegram - [Leo Proger](https://t.me/Leo_Proger)
