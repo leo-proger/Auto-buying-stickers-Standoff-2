@@ -1,5 +1,7 @@
 # Auto buying stickers Standoff 2
 
+🔥 Наш тг канал с новостями ([ссылка](https://t.me/public_standoff2_community)) 🔥
+
 ## Важное примечание
 Я написал еще один скрипт для покупки наклеек.
 
