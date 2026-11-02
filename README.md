@@ -1,6 +1,6 @@
 # Auto buying stickers Standoff 2
 
-🔥 Там скоро дропну новый скрипт 👉 ([тгшка](https://t.me/public_standoff2_community))🔥
+🔥 Там скоро дропну новый скрипт 👉 [тгшка](https://t.me/public_standoff2_community)🔥
 
 ## Описание
 
